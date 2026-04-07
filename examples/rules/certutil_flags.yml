@@ -1,0 +1,29 @@
+title: Certutil Suspicious Command Line Flags
+id: 66666666-6666-6666-6666-666666666666
+description: >
+  Detects certutil.exe usage with command line flags commonly associated
+  with file download, encoding, or decoding operations.
+status: experimental
+author: Jean Koumou
+date: 2026/03/18
+references:
+  - https://attack.mitre.org/techniques/T1140/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\certutil.exe'
+    CommandLine|contains:
+      - '-decode'
+      - '-encode'
+      - 'urlcache'
+      - '-urlcache'
+  condition: selection
+falsepositives:
+  - IT administrators managing certificates
+tags:
+  - attack.defense_evasion
+  - attack.t1140
+  - attack.t1105
+level: medium

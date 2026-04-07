@@ -1,0 +1,25 @@
+title: PsExec Service Install
+id: 7ed6cf48-3673-4691-b25f-bab373fe1a39
+description: Detects psexec service install patterns for lateral movement and remote
+  execution.
+status: experimental
+author: RuleScope Demo
+date: '2026-03-21'
+references:
+- https://attack.mitre.org/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains:
+    - PSEXESVC
+    - \\
+    - -accepteula
+  condition: selection
+falsepositives:
+- Planned software deployment or administration
+tags:
+- attack.lateral_movement
+- attack.t1569.002
+level: medium

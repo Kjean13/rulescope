@@ -1,0 +1,20 @@
+╭────────────────────────────── RuleScope Compare ──────────────────────────────╮
+│ Regression                                                                   │
+│ ./datasets/regression_demo/baseline -> ./datasets/regression_demo/candidate  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+ Metric                      Value 
+ Score delta                    -9 
+ Duplicate delta                +0 
+ Overlap delta                  +0 
+ Weak-rule delta                +3 
+ Changed rules                   2 
+ Improved rules                  0 
+ Regressed rules                 2 
+ New high/critical findings      3 
+
+Takeaways:
+  - Catalog score delta: -9 points.
+  - Analytically weak rules delta: +3.
+  - Rules added/removed: +1 / -0.
+  - Rules with material regressions: 2.
+  - New high/critical findings introduced: 3.

@@ -1,0 +1,10 @@
+title: Short Rule
+logsource:
+  product: windows
+detection:
+  selection:
+    Image|contains:
+      - '*rundll32*'
+      - '*regsvr32*'
+  condition: selection
+level: high

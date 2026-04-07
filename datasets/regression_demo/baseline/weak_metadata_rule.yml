@@ -1,0 +1,9 @@
+title: Short Rule
+description: bad
+logsource:
+  product: windows
+detection:
+  selection:
+    Image|endswith: '\\rundll32.exe'
+  condition: selection
+level: low

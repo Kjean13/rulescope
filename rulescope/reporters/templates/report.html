@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="{{ labels.html_lang }}">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>{{ labels.title }} — {{ report.target }}</title>
+<style>
+:root{--bg:#0c111b;--surface:#131a2b;--border:#1e2d4a;--text:#d1d5db;--text-muted:#6b7280;--accent:#3b82f6;--accent-glow:rgba(59,130,246,.12);--green:#22c55e;--yellow:#eab308;--red:#ef4444;--orange:#f97316}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'SF Mono','Fira Code',Consolas,monospace;background:var(--bg);color:var(--text);line-height:1.6;padding:0}
+.container{max-width:1440px;margin:0 auto;padding:24px 32px}
+h1{font-size:1.6rem;font-weight:700;letter-spacing:-0.02em;color:#fff}
+h2{font-size:1.1rem;font-weight:600;color:#e5e7eb;margin-bottom:12px;border-bottom:1px solid var(--border);padding-bottom:8px}
+h3{font-size:.95rem;font-weight:600;color:#d1d5db}
+a{color:var(--accent);text-decoration:none}
+
+/* Header */
+.header{background:linear-gradient(135deg,#0f172a 0%,#1a1f3a 100%);border-bottom:1px solid var(--border);padding:28px 32px}
+.header-inner{max-width:1440px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.header-left{display:flex;align-items:center;gap:16px}
+.logo{width:40px;height:40px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:1.2rem}
+.header-meta{color:var(--text-muted);font-size:.75rem}
+
+/* Executive banner */
+.exec-banner{display:grid;grid-template-columns:200px 1fr;gap:32px;padding:28px;background:var(--surface);border:1px solid var(--border);border-radius:14px;margin:20px 0}
+.score-ring{position:relative;width:160px;height:160px;margin:0 auto}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring .value{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.4rem;font-weight:800;color:#fff}
+.score-ring .label{position:absolute;top:68%;left:50%;transform:translate(-50%,0);font-size:.75rem;color:var(--text-muted)}
+.exec-actions{display:flex;flex-direction:column;justify-content:center;gap:8px}
+.exec-actions li{list-style:none;padding:6px 12px;background:rgba(234,179,8,.06);border-left:3px solid var(--yellow);border-radius:0 8px 8px 0;font-size:.82rem}
+
+/* Metric cards */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:16px 0}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.metric-card .num{font-size:1.5rem;font-weight:700;color:#fff}
+.metric-card .lbl{font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin:16px 0}
+
+/* Radar chart */
+.radar-wrap{display:flex;justify-content:center;padding:12px 0}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{text-align:left;padding:10px 12px;border-bottom:2px solid var(--border);color:var(--text-muted);font-weight:600;text-transform:uppercase;font-size:.7rem;letter-spacing:.04em}
+td{padding:9px 12px;border-bottom:1px solid rgba(30,45,74,.5);vertical-align:top}
+tr:hover td{background:rgba(59,130,246,.04)}
+
+/* Tags */
+.tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:.72rem;margin:2px}
+.tag-critical{background:rgba(239,68,68,.15);color:var(--red)}
+.tag-high{background:rgba(249,115,22,.15);color:var(--orange)}
+.tag-medium{background:rgba(234,179,8,.15);color:var(--yellow)}
+.tag-low{background:rgba(59,130,246,.12);color:var(--accent)}
+.tag-info{background:rgba(107,114,128,.15);color:var(--text-muted)}
+.tag-score{background:rgba(34,197,94,.1);color:var(--green);font-weight:600}
+
+/* Budget */
+.budget-pass{color:var(--green);font-weight:700}.budget-fail{color:var(--red);font-weight:700}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.filter-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text-muted);cursor:pointer;font-size:.78rem;font-family:inherit;transition:all .15s}
+.filter-btn:hover,.filter-btn.active{background:var(--accent-glow);border-color:var(--accent);color:var(--accent)}
+.filter-btn .count{margin-left:4px;opacity:.6}
+
+/* Rule cards */
+.rule-card{border:1px solid var(--border);border-radius:12px;padding:16px;margin:10px 0;background:var(--bg);transition:border-color .15s}
+.rule-card:hover{border-color:rgba(59,130,246,.3)}
+.rule-header{display:flex;justify-content:space-between;align-items:start;gap:12px;margin-bottom:8px}
+.rule-score{font-size:1.1rem;font-weight:700;white-space:nowrap}
+.rule-pillars{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.pillar-badge{font-size:.7rem;padding:2px 7px;border-radius:5px;background:rgba(59,130,246,.08);color:var(--text-muted)}
+.finding-item{padding:6px 10px;margin:4px 0;border-radius:8px;background:rgba(255,255,255,.02);font-size:.8rem;border-left:3px solid var(--border)}
+.finding-item.sev-critical{border-left-color:var(--red)}.finding-item.sev-high{border-left-color:var(--orange)}
+.finding-item.sev-medium{border-left-color:var(--yellow)}.finding-item.sev-low{border-left-color:var(--accent)}
+.finding-rec{color:var(--text-muted);font-size:.75rem;margin-top:2px}
+
+/* Responsive */
+@media(max-width:800px){.exec-banner{grid-template-columns:1fr}.header-inner{flex-direction:column;align-items:flex-start}}
+
+/* Search */
+.search-input{width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:inherit;font-size:.85rem;margin-bottom:12px}
+.search-input:focus{outline:none;border-color:var(--accent)}
+.hidden{display:none !important}
+</style>
+</head>
+<body>
+<div class="header">
+<div class="header-inner">
+<div class="header-left">
+<div class="logo">RL</div>
+<div>
+<h1>{{ labels.title }}</h1>
+<div class="header-meta">{{ report.target }} · {{ report.generated_at }} · v{{ report.version }}</div>
+</div>
+</div>
+<div>
+<span class="budget-{{ 'pass' if s.budget_result.passed else 'fail' }}">{{ labels.budget }}: {{ labels.budget_state }}</span>
+</div>
+</div>
+</div>
+
+<div class="container">
+
+<!-- Executive summary -->
+<div class="exec-banner">
+<div>
+<div class="score-ring">
+<svg viewBox="0 0 160 160" width="160" height="160">
+<circle cx="80" cy="80" r="70" fill="none" stroke="var(--border)" stroke-width="10"/>
+<circle cx="80" cy="80" r="70" fill="none"
+  stroke="{% if s.catalog_health_score >= 75 %}var(--green){% elif s.catalog_health_score >= 50 %}var(--yellow){% else %}var(--red){% endif %}"
+  stroke-width="10" stroke-linecap="round"
+  stroke-dasharray="{{ (s.catalog_health_score / 100 * 439.8)|round(1) }} 439.8"/>
+</svg>
+<div class="value">{{ s.catalog_health_score }}</div>
+<div class="label">{{ score_band_label(s.score_band) }}</div>
+<div style="font-size:0.75rem;opacity:0.7;margin-top:2px">avg rule: {{ s.average_score }}/100</div>
+</div>
+</div>
+<div class="exec-actions">
+<h2 style="border:none;padding:0;margin-bottom:4px">{{ labels.priority_actions }}</h2>
+{% if s.priority_actions %}
+<ul style="padding:0">
+{% for a in s.priority_actions %}<li>{{ translate_text(a) }}</li>{% endfor %}
+</ul>
+{% else %}<p style="color:var(--green)">{{ labels.no_critical_actions }}</p>{% endif %}
+</div>
+</div>
+
+<!-- Key metrics -->
+<div class="metrics">
+<div class="metric-card"><div class="num">{{ s.total_rules }}</div><div class="lbl">{{ labels.rules_analyzed }}</div></div>
+<div class="metric-card"><div class="num">{{ s.median_score }}</div><div class="lbl">{{ labels.median_score }}</div></div>
+<div class="metric-card"><div class="num">{{ s.duplicate_pairs }}</div><div class="lbl">{{ labels.duplicate_clusters }}</div></div>
+<div class="metric-card"><div class="num">{{ s.overlap_pairs }}</div><div class="lbl">{{ labels.overlap_pairs }}</div></div>
+<div class="metric-card"><div class="num">{{ s.high_noise_rules }}</div><div class="lbl">{{ labels.high_noise_rules }}</div></div>
+<div class="metric-card"><div class="num">{{ s.weak_rules }}</div><div class="lbl">{{ labels.weak_rules }}</div></div>
+<div class="metric-card"><div class="num">{{ s.invalid_rules }}</div><div class="lbl">{{ labels.invalid_rules }}</div></div>
+<div class="metric-card"><div class="num">{{ s.debt.total_findings }}</div><div class="lbl">{{ labels.total_findings }}</div></div>
+</div>
+
+<!-- Radar chart -->
+<div class="card">
+<h2>{{ labels.quality_pillars }}</h2>
+<div class="radar-wrap">
+<svg id="radar" viewBox="0 0 400 380" width="400" height="380"></svg>
+</div>
+</div>
+
+<!-- Budget details -->
+{% if s.budget_result.failures %}
+<div class="card">
+<h2>{{ labels.budget_failures }}</h2>
+{% for f in s.budget_result.failures %}<div style="padding:4px 0;color:var(--red)">✗ {{ translate_text(f) }}</div>{% endfor %}
+</div>
+{% endif %}
+
+<!-- ATT&CK coverage -->
+{% if s.coverage %}
+<div class="card">
+<h2>{{ labels.attack_coverage }}</h2>
+<table>
+<thead><tr><th>Tactic</th><th>Techniques</th><th>Rules</th><th>Avg quality</th><th>Band</th><th>Fragile</th><th>Concentration</th></tr></thead>
+<tbody>{% for cov in s.coverage %}<tr>
+<td>{{ cov.tactic }}</td><td>{{ cov.technique_count }}</td><td>{{ cov.rule_count }}</td>
+<td>{{ cov.avg_quality }}</td><td>{{ cov.quality_band }}</td>
+<td>{% if cov.fragile %}<span style="color:var(--red)">Yes</span>{% else %}No{% endif %}</td>
+<td>{% if cov.concentration_risk %}<span style="color:var(--orange)">Yes</span>{% else %}No{% endif %}</td>
+</tr>{% endfor %}</tbody>
+</table>
+</div>
+{% endif %}
+
+<!-- Technical debt -->
+<div class="card">
+<h2>{{ labels.technical_debt }}</h2>
+<table>
+<thead><tr><th>Category</th><th>Findings</th><th>Critical</th><th>High</th><th>Medium</th><th>Low</th><th>Info</th></tr></thead>
+<tbody>{% for cat in s.debt.categories %}<tr>
+<td>{{ cat.category }}</td><td>{{ cat.count }}</td>
+<td>{% if cat.critical %}<span style="color:var(--red)">{{ cat.critical }}</span>{% else %}0{% endif %}</td>
+<td>{% if cat.high %}<span style="color:var(--orange)">{{ cat.high }}</span>{% else %}0{% endif %}</td>
+<td>{{ cat.medium }}</td><td>{{ cat.low }}</td><td>{{ cat.info }}</td>
+</tr>{% endfor %}</tbody>
+</table>
+</div>
+
+<!-- Segments -->
+{% if s.segments_by_logsource %}
+<div class="card">
+<h2>{{ labels.scores_by_logsource }}</h2>
+<table>
+<thead><tr><th>Logsource</th><th>Rules</th><th>Avg score</th><th>Worst</th></tr></thead>
+<tbody>{% for seg in s.segments_by_logsource %}<tr>
+<td>{{ seg.segment }}</td><td>{{ seg.rule_count }}</td><td>{{ seg.average_score }}</td><td>{{ seg.worst_score }}</td>
+</tr>{% endfor %}</tbody>
+</table>
+</div>
+{% endif %}
+
+<!-- Duplicate clusters -->
+{% if report.duplicate_clusters %}
+<div class="card">
+<h2>{{ labels.duplicate_clusters_title }}</h2>
+{% for cluster in report.duplicate_clusters %}
+<div style="padding:6px 0">{% for item in cluster %}<span class="tag tag-medium">{{ item.split('/')[-1] }}</span>{% endfor %}</div>
+{% endfor %}
+</div>
+{% endif %}
+
+<!-- Rule details -->
+<div class="card">
+<h2>{{ labels.rule_details }} ({{ s.total_rules }} {{ labels.rules_analyzed|lower }})</h2>
+<input type="text" class="search-input" id="ruleSearch" placeholder="{{ labels.search_placeholder }}" oninput="filterRules()"/>
+<div class="filter-bar" id="filterBar">
+<button class="filter-btn active" onclick="setFilter('all',this)">{{ labels.all }}</button>
+<button class="filter-btn" onclick="setFilter('critical',this)">{{ labels.critical }}</button>
+<button class="filter-btn" onclick="setFilter('high',this)">{{ labels.high }}</button>
+<button class="filter-btn" onclick="setFilter('medium',this)">{{ labels.medium }}</button>
+<button class="filter-btn" onclick="setFilter('low',this)">{{ labels.low_info }}</button>
+<button class="filter-btn" onclick="setFilter('score-low',this)">{{ labels.score_lt_70 }}</button>
+</div>
+<div id="ruleList">
+{% for rule in report.rules|sort(attribute='scores.overall') %}
+<div class="rule-card" data-score="{{ rule.scores.overall }}" data-severities="{% for f in rule.findings %}{{ f.severity }} {% endfor %}" data-search="{{ (rule.title or rule.path)|lower }} {{ rule.path|lower }} {% for f in rule.findings %}{{ f.code|lower }} {{ f.message|lower }} {% endfor %}">
+<div class="rule-header">
+<div>
+<h3>{{ rule.title or rule.path }}</h3>
+<div style="color:var(--text-muted);font-size:.75rem">{{ rule.path }} · {{ rule.logsource_key }}</div>
+</div>
+<div class="rule-score" style="color:{% if rule.scores.overall >= 75 %}var(--green){% elif rule.scores.overall >= 50 %}var(--yellow){% else %}var(--red){% endif %}">{{ rule.scores.overall }}/100</div>
+</div>
+<div class="rule-pillars">
+{% for name, value in rule.scores.model_dump().items() if name != 'overall' %}
+<span class="pillar-badge">{{ pillar_label(name) }}: {{ value }}</span>
+{% endfor %}
+</div>
+{% for f in rule.findings %}
+<div class="finding-item sev-{{ f.severity }}">
+<strong>{{ f.code }}</strong> <span class="tag tag-{{ f.severity }}">{{ f.severity if not is_fr else ('critique' if f.severity=='critical' else 'élevé' if f.severity=='high' else 'moyen' if f.severity=='medium' else 'faible' if f.severity=='low' else 'info') }}</span> {{ f.message }}
+{% if f.recommendation %}<div class="finding-rec">→ {{ f.recommendation }}</div>{% endif %}
+</div>
+{% endfor %}
+</div>
+{% endfor %}
+</div>
+</div>
+
+</div>
+
+<script>
+// Radar chart
+(function(){
+const data = {{ pillar_json }};
+const labels = Object.keys(data);
+const values = Object.values(data);
+const n = labels.length;
+const cx=200, cy=180, R=140;
+const svg = document.getElementById('radar');
+const rings = [25,50,75,100];
+let html = '';
+rings.forEach(r => {
+  const pts = [];
+  for(let i=0;i<n;i++){const a=2*Math.PI*i/n - Math.PI/2; pts.push(`${cx+R*r/100*Math.cos(a)},${cy+R*r/100*Math.sin(a)}`);}
+  html += `<polygon points="${pts.join(' ')}" fill="none" stroke="rgba(30,45,74,.6)" stroke-width="1"/>`;
+  if(r===50) html += `<text x="${cx+4}" y="${cy-R*r/100+12}" fill="#6b7280" font-size="10">50</text>`;
+  if(r===100) html += `<text x="${cx+4}" y="${cy-R*r/100+12}" fill="#6b7280" font-size="10">100</text>`;
+});
+for(let i=0;i<n;i++){
+  const a=2*Math.PI*i/n - Math.PI/2;
+  const ex=cx+R*Math.cos(a), ey=cy+R*Math.sin(a);
+  html += `<line x1="${cx}" y1="${cy}" x2="${ex}" y2="${ey}" stroke="rgba(30,45,74,.4)" stroke-width="1"/>`;
+  const lx=cx+(R+20)*Math.cos(a), ly=cy+(R+20)*Math.sin(a);
+  html += `<text x="${lx}" y="${ly+4}" fill="#9ca3af" font-size="11" text-anchor="middle">${labels[i]}</text>`;
+}
+const pts=[];
+for(let i=0;i<n;i++){const a=2*Math.PI*i/n - Math.PI/2; pts.push(`${cx+R*values[i]/100*Math.cos(a)},${cy+R*values[i]/100*Math.sin(a)}`);}
+html += `<polygon points="${pts.join(' ')}" fill="rgba(59,130,246,.15)" stroke="#3b82f6" stroke-width="2.5"/>`;
+for(let i=0;i<n;i++){const a=2*Math.PI*i/n - Math.PI/2;const vx=cx+R*values[i]/100*Math.cos(a),vy=cy+R*values[i]/100*Math.sin(a);
+  html += `<circle cx="${vx}" cy="${vy}" r="4" fill="#3b82f6"/>`;
+  html += `<text x="${vx}" y="${vy-8}" fill="#93c5fd" font-size="11" text-anchor="middle" font-weight="600">${values[i]}</text>`;
+}
+svg.innerHTML = html;
+})();
+
+// Filtering
+let currentFilter = 'all';
+function setFilter(f, btn){
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filterRules();
+}
+function filterRules(){
+  const q = document.getElementById('ruleSearch').value.toLowerCase();
+  document.querySelectorAll('.rule-card').forEach(card => {
+    const searchText = card.dataset.search || '';
+    const score = parseInt(card.dataset.score);
+    const sevs = card.dataset.severities || '';
+    let show = true;
+    if(q && !searchText.includes(q)) show = false;
+    if(currentFilter==='critical' && !sevs.includes('critical')) show = false;
+    if(currentFilter==='high' && !sevs.includes('high') && !sevs.includes('critical')) show = false;
+    if(currentFilter==='medium' && !sevs.includes('medium') && !sevs.includes('high') && !sevs.includes('critical')) show = false;
+    if(currentFilter==='low' && score >= 90) show = false;
+    if(currentFilter==='score-low' && score >= 70) show = false;
+    card.classList.toggle('hidden', !show);
+  });
+}
+</script>
+</body>
+</html>

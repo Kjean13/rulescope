@@ -1,0 +1,24 @@
+title: Suspicious PowerShell EncodedCommand
+id: 11111111-1111-1111-1111-111111111111
+description: Detects PowerShell launched with an encoded command argument, which may indicate obfuscation or malicious execution.
+status: experimental
+author: Jean
+date: 2026-03-18
+references:
+  - https://example.org/powershell
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  sel:
+    Image|endswith: '\\powershell.exe'
+    CommandLine|contains:
+      - '-enc'
+      - 'EncodedCommand'
+  condition: sel
+falsepositives:
+  - administrative scripts
+tags:
+  - attack.execution
+  - attack.t1059.001
+level: medium

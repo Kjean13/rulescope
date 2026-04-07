@@ -1,0 +1,29 @@
+title: PowerShell Recon Commands
+id: 192f76e4-3202-40c7-b91a-7a3bf017cc80
+description: Detects powershell recon commands patterns in process creation telemetry
+  for governance demonstration.
+status: experimental
+author: Jean Koumou
+date: '2026-03-21'
+modified: '2026-03-21'
+references:
+- https://attack.mitre.org/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith: \powershell.exe
+  selection_cmd:
+    CommandLine|contains:
+    - Get-ADUser
+    - Get-DomainComputer
+    - Get-NetGroup
+  condition: selection_img and selection_cmd
+falsepositives:
+- Administrative PowerShell automation
+- Blue-team triage activity
+tags:
+- attack.execution
+- attack.t1087
+level: medium

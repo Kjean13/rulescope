@@ -1,0 +1,28 @@
+title: Office spawning PowerShell
+id: 8903c27e-2eff-4c55-9594-80a2903ddc1e
+description: Detects office spawning powershell patterns in process creation telemetry
+  for governance demonstration.
+status: experimental
+author: Jean Koumou
+date: '2026-03-21'
+modified: '2026-03-21'
+references:
+- https://attack.mitre.org/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith: \powershell.exe
+  selection_cmd:
+    CommandLine|contains:
+    - powershell
+    - FromBase64String
+  condition: selection_img and selection_cmd
+falsepositives:
+- Administrative PowerShell automation
+- Blue-team triage activity
+tags:
+- attack.execution
+- attack.t1204
+level: high

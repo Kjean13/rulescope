@@ -1,0 +1,29 @@
+title: PowerShell Download Cradle
+id: 1236fd50-d5fe-4b51-8253-238028a24e10
+description: Detects powershell download cradle patterns in process creation telemetry
+  for governance demonstration.
+status: experimental
+author: Jean Koumou
+date: '2026-03-21'
+modified: '2026-03-21'
+references:
+- https://attack.mitre.org/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith: \powershell.exe
+  selection_cmd:
+    CommandLine|contains:
+    - 'iwr '
+    - Invoke-WebRequest
+    - DownloadString
+  condition: selection_img and selection_cmd
+falsepositives:
+- Administrative PowerShell automation
+- Blue-team triage activity
+tags:
+- attack.execution
+- attack.t1105
+level: high

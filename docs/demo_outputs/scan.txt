@@ -1,0 +1,65 @@
+╭────────────────────────────────── RuleScope ──────────────────────────────────╮
+│ 48/100 High risk                                                             │
+│ Target: ./datasets/medium_realistic | 32 rules | Median 96                   │
+╰──────────────────────────────────────────────────────────────────────────────╯
+ Metric            Value 
+ Duplicate pairs      10 
+ Overlap pairs       194 
+ High-noise rules      4 
+ Weak metadata         2 
+ Weak rules           16 
+ Invalid rules         1 
+ Total findings      176 
+    Average pillars     
+ Pillar           Score 
+ metadata            92 
+ maintainability     97 
+ noise               90 
+ structural          97 
+ documentation       96 
+ attack_quality      93 
+ weakness            69 
+
+Governance budget: failed
+  - average_score 48 < 70
+  - overlap_pairs 194 > 15
+  - invalid_rules 1 > 0
+
+Priority actions:
+  - Fix 1 invalid or structurally broken rules first.
+  - Review 10 duplicate clusters to reduce redundant detections.
+  - Tune or narrow 4 high-noise rules before production rollout.
+  - Complete metadata on 2 weakly documented rules.
+  - Harden 16 analytically weak rules before promoting them to production 
+severity.
+
+Top issues:
+  - CRITICAL PARSE-001 · broken_rule.yml · YAML parsing failed.
+  - HIGH NOISE-001 · Generic Archive Staging · Rule uses many wildcards and may 
+match too broadly.
+  - HIGH WEAK-002 · Generic Archive Staging · Rule uses multiple wildcard-heavy 
+values.
+  - HIGH NOISE-001 · Generic Encoded Interpreter Invocation · Rule uses many 
+wildcards and may match too broadly.
+  - HIGH WEAK-002 · Generic Encoded Interpreter Invocation · Rule uses multiple 
+wildcard-heavy values.
+  - HIGH NOISE-001 · Generic Remote Admin Tool Indicators · Rule uses many 
+wildcards and may match too broadly.
+  - HIGH WEAK-002 · Generic Remote Admin Tool Indicators · Rule uses multiple 
+wildcard-heavy values.
+  - HIGH NOISE-001 · Suspicious Generic Process Pattern · Rule uses many 
+wildcards and may match too broadly.
+  - HIGH WEAK-002 · Suspicious Generic Process Pattern · Rule uses multiple 
+wildcard-heavy values.
+  - HIGH NOISE-001 · Suspicious Process Injection Generic · Rule uses many 
+wildcards and may match too broadly.
+  - HIGH WEAK-002 · Suspicious Process Injection Generic · Rule uses multiple 
+wildcard-heavy values.
+  - HIGH NOISE-001 · Suspicious Process Injection Generic Duplicate · Rule uses 
+many wildcards and may match too broadly.
+  - HIGH WEAK-002 · Suspicious Process Injection Generic Duplicate · Rule uses 
+multiple wildcard-heavy values.
+  - MEDIUM WEAK-001 · BITSAdmin Suspicious Transfer Job · Rule relies on a 
+single selector block.
+  - MEDIUM WEAK-003 · BITSAdmin Suspicious Transfer Job · Rule depends mainly on
+contains-based matching.

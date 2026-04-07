@@ -1,0 +1,25 @@
+title: WMIC Remote Process Create
+id: bdc5e73b-dd1d-4c51-ac5f-6364956f3bdd
+description: Detects wmic remote process create patterns for lateral movement and
+  remote execution.
+status: experimental
+author: RuleScope Demo
+date: '2026-03-21'
+references:
+- https://attack.mitre.org/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains:
+    - wmic
+    - '/node:'
+    - process call create
+  condition: selection
+falsepositives:
+- Planned software deployment or administration
+tags:
+- attack.lateral_movement
+- attack.t1047
+level: medium

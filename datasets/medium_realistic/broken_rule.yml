@@ -1,0 +1,22 @@
+title: Broken YAML rule
+id: 44444444-4444-4444-4444-444444444444
+description: This file is intentionally broken for parser testing
+status: stable
+author: Jean
+date: 2026-03-18
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\\cmd.exe'
+  condition: selection
+references:
+  - https://example.org/broken
+falsepositives:
+  - test
+level: medium
+tags:
+  - attack.execution
+  - attack.t1059
+  bad-indent: true

@@ -1,0 +1,31 @@
+title: Generic Remote Admin Tool Indicators
+id: a02f169b-f631-4178-9ab9-7797b4adec54
+description: Broad heuristic rule for generic remote admin tool indicators included
+  to generate governance findings.
+status: test
+author: RuleScope Demo
+date: '2026-03-21'
+references:
+- https://example.org/demo
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  sel1:
+    CommandLine|contains:
+    - anydesk
+    - teamviewer
+    - screenconnect
+    Image|contains:
+    - '*temp*'
+    - '*download*'
+  sel2:
+    ParentImage|contains:
+    - '*cmd*'
+    - '*powershell*'
+  condition: sel1 or sel2
+falsepositives: []
+tags:
+- attack.execution
+- attack.discovery
+level: medium

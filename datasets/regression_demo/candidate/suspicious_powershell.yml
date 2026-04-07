@@ -1,0 +1,23 @@
+title: Suspicious PowerShell EncodedCommand
+id: 11111111-1111-1111-1111-111111111111
+description: Broad PowerShell rule intentionally degraded for PR regression demo.
+status: experimental
+level: high
+author: RuleScope Demo
+date: 2026-03-21
+tags:
+  - attack.execution
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  sel:
+    Image|contains:
+      - '*power*'
+      - '*pwsh*'
+    CommandLine|contains:
+      - '-enc'
+      - '-e'
+      - 'base64'
+  condition: sel
+falsepositives: []

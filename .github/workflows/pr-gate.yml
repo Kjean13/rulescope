@@ -1,0 +1,135 @@
+name: RuleScope PR Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/*.yml'
+      - '**/*.yaml'
+      - '.github/workflows/pr-gate.yml'
+      - '.rulescope.yml'
+      - 'pyproject.toml'
+  workflow_dispatch:
+    inputs:
+      detection_rules_path:
+        description: Path to the detection rules directory
+        required: false
+        default: examples/rules
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  pr-gate:
+    runs-on: ubuntu-latest
+    env:
+      DETECTION_RULES_PATH: ${{ inputs.detection_rules_path || vars.DETECTION_RULES_PATH || 'examples/rules' }}
+      PYTHON_VERSION: '3.12'
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install RuleScope
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+
+      - name: Prepare baseline checkout
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .pr_gate
+          git worktree add .pr_gate/base "${{ github.event.pull_request.base.sha }}"
+
+      - name: Validate target paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            test -d "$DETECTION_RULES_PATH" || { echo "Missing candidate path: $DETECTION_RULES_PATH"; exit 1; }
+            test -d ".pr_gate/base/$DETECTION_RULES_PATH" || {
+              echo "Missing baseline path: .pr_gate/base/$DETECTION_RULES_PATH";
+              echo "Set DETECTION_RULES_PATH to your Sigma rules directory in .github/workflows/pr-gate.yml or repository variable.";
+              exit 1;
+            }
+          else
+            test -d "$DETECTION_RULES_PATH" || { echo "Missing target path: $DETECTION_RULES_PATH"; exit 1; }
+          fi
+
+      - name: Generate RuleScope artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            rulescope compare \
+              ".pr_gate/base/$DETECTION_RULES_PATH" \
+              "$DETECTION_RULES_PATH" \
+              --format markdown \
+              --output artifacts/compare.md
+          else
+            rulescope scan "$DETECTION_RULES_PATH" --format markdown --output artifacts/compare.md
+          fi
+          rulescope report "$DETECTION_RULES_PATH" --output artifacts/rulescope_report.html
+          rulescope scan "$DETECTION_RULES_PATH" --format json --output artifacts/catalog.json
+
+      - name: Publish workflow summary
+        shell: bash
+        run: |
+          {
+            echo "# RuleScope PR Gate"
+            echo
+            echo "- Rules path: \`$DETECTION_RULES_PATH\`"
+            echo "- HTML report attached as workflow artifact"
+            echo
+            cat artifacts/compare.md
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Enforce regression gate
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          rulescope compare \
+            ".pr_gate/base/$DETECTION_RULES_PATH" \
+            "$DETECTION_RULES_PATH" \
+            --fail-on-regression
+
+      - name: Upload RuleScope artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rulescope-pr-artifacts
+          path: artifacts/
+
+      - name: Comment compare summary on pull request
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- rulescope-pr-gate -->';
+            const compare = fs.readFileSync('artifacts/compare.md', 'utf8');
+            const body = `${marker}\n## RuleScope PR Gate\n\n${compare.slice(0, 60000)}`;
+            const {owner, repo} = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const existing = comments.find(c => c.user?.type === 'Bot' && c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }

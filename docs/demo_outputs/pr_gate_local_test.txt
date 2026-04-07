@@ -1,0 +1,4 @@
+Compare report written to 
+/mnt/data/rulescope_pr_gate_validation_repo/.pr_gate_local_artifacts/compare.md
+Local PR gate exit code: 1
+Artifacts: /mnt/data/rulescope_pr_gate_validation_repo/.pr_gate_local_artifacts

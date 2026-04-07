@@ -1,0 +1,25 @@
+title: BITSAdmin Suspicious Transfer Job
+id: f0c8e773-80b2-4dd7-b8c9-da6a1d27af64
+description: Detects suspicious bitsadmin suspicious transfer job behavior often associated
+  with LOLBin abuse.
+status: stable
+author: Jean Koumou
+date: '2026-03-21'
+references:
+- https://lolbas-project.github.io/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: \bitsadmin.exe
+    CommandLine|contains:
+    - /transfer
+    - http
+  condition: selection
+falsepositives:
+- Rare administrative troubleshooting
+tags:
+- attack.defense_evasion
+- attack.t1197
+level: high

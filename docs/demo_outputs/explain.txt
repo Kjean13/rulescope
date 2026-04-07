@@ -1,0 +1,25 @@
+Rule: Short Rule
+Path: datasets/regression_demo/candidate/weak_metadata_rule.yml
+Overall score: 76/100
+
+Findings:
+- NOISE-001  Rule uses many wildcards and may match too broadly.
+- NOISE-005  High/critical severity with very thin detection logic.
+- META-007  Rule has no creation date.
+- META-005  Description is too short to explain analyst intent.
+- META-006  Rule has too few tags.
+- WEAK-004  Rule has low field diversity.
+- META-001  Rule is missing important metadata fields.
+- NOISE-003  False positive guidance is missing.
+- ATK-001  Rule has no ATT&CK tags.
+- WEAK-001  Rule relies on a single selector block.
+- WEAK-003  Rule depends mainly on contains-based matching.
+- WEAK-005  Declared severity is stronger than the underlying detection logic.
+
+Recommended improvements:
+- Complete metadata: description, author, references, false positives, and 
+ATT&CK tags.
+- Reduce noise by tightening broad patterns and documenting expected benign 
+activity.
+- Add discriminating selectors such as parent process, user context, or exact 
+image/path constraints.

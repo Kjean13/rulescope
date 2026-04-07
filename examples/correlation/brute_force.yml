@@ -1,0 +1,25 @@
+title: Brute Force Detection via Failed Logons
+id: aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+status: test
+type: correlation
+description: Detects brute force attacks by correlating multiple failed logon events within a short window.
+author: test
+date: 2024-06-01
+level: high
+tags:
+  - attack.credential_access
+  - attack.t1110.001
+references:
+  - https://attack.mitre.org/techniques/T1110/001/
+falsepositives:
+  - Users mistyping passwords repeatedly
+correlation:
+  type: event_count
+  rules:
+    - failed_logon_base
+  group-by:
+    - SourceIP
+    - TargetUserName
+  timespan: 5m
+  condition:
+    gte: 5

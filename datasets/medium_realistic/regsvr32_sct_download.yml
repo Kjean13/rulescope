@@ -1,0 +1,25 @@
+title: Regsvr32 SCT Download
+id: dfa350b8-be99-4bb9-ac10-4f32c2cfe0c9
+description: Detects suspicious regsvr32 sct download behavior often associated with
+  LOLBin abuse.
+status: stable
+author: Jean Koumou
+date: '2026-03-21'
+references:
+- https://lolbas-project.github.io/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: \regsvr32.exe
+    CommandLine|contains:
+    - /i:http
+    - scrobj.dll
+  condition: selection
+falsepositives:
+- Rare administrative troubleshooting
+tags:
+- attack.defense_evasion
+- attack.t1218.010
+level: high

@@ -1,0 +1,21 @@
+title: Broad LOLBIN Demo
+id: 44444444-4444-4444-4444-444444444444
+description: Intentionally broad rule to simulate a regression in a PR.
+status: experimental
+level: high
+author: RuleScope Demo
+date: 2026-03-21
+tags:
+  - attack.execution
+  - attack.t1218
+falsepositives: []
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|contains:
+      - "cmd"
+      - "powershell"
+      - "rundll32"
+  condition: selection

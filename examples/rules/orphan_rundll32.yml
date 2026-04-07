@@ -1,0 +1,10 @@
+title: Generic Rundll32 Execution
+description: Detects rundll32 execution
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    Image|endswith: '\rundll32.exe'
+  condition: selection
+level: low

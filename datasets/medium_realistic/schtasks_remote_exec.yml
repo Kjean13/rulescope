@@ -1,0 +1,25 @@
+title: Remote Scheduled Task Creation
+id: 8487b134-e141-4d96-8273-067233767072
+description: Detects remote scheduled task creation patterns for lateral movement
+  and remote execution.
+status: experimental
+author: RuleScope Demo
+date: '2026-03-21'
+references:
+- https://attack.mitre.org/
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains:
+    - /create
+    - '/s '
+    - '/ru '
+  condition: selection
+falsepositives:
+- Planned software deployment or administration
+tags:
+- attack.lateral_movement
+- attack.t1053.005
+level: medium

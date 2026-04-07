@@ -1,0 +1,31 @@
+title: Generic Archive Staging
+id: 196f64dc-e7d8-431d-b30e-62c32ca9f324
+description: Broad heuristic rule for generic archive staging included to generate
+  governance findings.
+status: test
+author: RuleScope Demo
+date: '2026-03-21'
+references:
+- https://example.org/demo
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  sel1:
+    CommandLine|contains:
+    - zip
+    - rar
+    - 7z
+    Image|contains:
+    - '*users*'
+    - '*desktop*'
+  sel2:
+    ParentImage|contains:
+    - '*cmd*'
+    - '*powershell*'
+  condition: sel1 or sel2
+falsepositives: []
+tags:
+- attack.execution
+- attack.discovery
+level: high

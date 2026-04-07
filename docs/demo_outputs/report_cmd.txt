@@ -1,0 +1,2 @@
+Report written to docs/demo_outputs/report.html
+32 rules analyzed, score 48/100 (High risk)

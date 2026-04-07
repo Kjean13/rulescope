@@ -1,0 +1,114 @@
+name: "RuleScope Quality Gate"
+description: "Scan Sigma detection rules for quality, noise, duplicates, and ATT&CK coverage. Fail on regressions. Installs RuleScope from the checked-out repository source."
+author: "Jean Koumou"
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  target:
+    description: "Path to Sigma rules directory"
+    required: true
+    default: "rules"
+  min-score:
+    description: "Minimum acceptable catalog score (0-100)"
+    required: false
+    default: "70"
+  fail-on-regression:
+    description: "Fail if comparison shows regression (requires baseline)"
+    required: false
+    default: "false"
+  baseline:
+    description: "Baseline rules path for comparison (optional)"
+    required: false
+    default: ""
+  format:
+    description: "Report format: html, json, markdown, sarif"
+    required: false
+    default: "sarif"
+  output:
+    description: "Report output file path"
+    required: false
+    default: "rulescope-report.sarif"
+  lang:
+    description: "Language: en or fr"
+    required: false
+    default: "en"
+  python-version:
+    description: "Python version to use"
+    required: false
+    default: "3.12"
+
+outputs:
+  score:
+    description: "Catalog quality score (0-100)"
+    value: ${{ steps.scan.outputs.score }}
+  verdict:
+    description: "Quality verdict: Excellent, Good, Needs work, High risk, Critical"
+    value: ${{ steps.scan.outputs.verdict }}
+  total-rules:
+    description: "Number of rules analyzed"
+    value: ${{ steps.scan.outputs.total_rules }}
+  total-findings:
+    description: "Total number of findings"
+    value: ${{ steps.scan.outputs.total_findings }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install RuleScope from repository
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install .
+
+    - name: Scan rules
+      id: scan
+      shell: bash
+      env:
+        RULESCOPE_LANG: ${{ inputs.lang }}
+      run: |
+        # Run scan and capture JSON output for metadata
+        rulescope scan "${{ inputs.target }}" --format json --output /tmp/rulescope_scan.json
+
+        # Extract metrics
+        SCORE=$(python3 -c "import json; d=json.load(open('/tmp/rulescope_scan.json')); print(d['summary']['average_score'])")
+        VERDICT=$(python3 -c "import json; d=json.load(open('/tmp/rulescope_scan.json')); print(d['summary']['score_band'])")
+        TOTAL=$(python3 -c "import json; d=json.load(open('/tmp/rulescope_scan.json')); print(d['summary']['total_rules'])")
+        FINDINGS=$(python3 -c "import json; d=json.load(open('/tmp/rulescope_scan.json')); print(d['summary']['debt']['total_findings'])")
+
+        echo "score=$SCORE" >> $GITHUB_OUTPUT
+        echo "verdict=$VERDICT" >> $GITHUB_OUTPUT
+        echo "total_rules=$TOTAL" >> $GITHUB_OUTPUT
+        echo "total_findings=$FINDINGS" >> $GITHUB_OUTPUT
+
+        echo "::notice::RuleScope: $TOTAL rules analyzed, score $SCORE/100 ($VERDICT), $FINDINGS findings"
+
+        # Generate report in requested format
+        rulescope report "${{ inputs.target }}" --format "${{ inputs.format }}" --output "${{ inputs.output }}"
+
+        # Quality gate
+        if [ "$SCORE" -lt "${{ inputs.min-score }}" ]; then
+          echo "::error::RuleScope quality gate failed: score $SCORE < ${{ inputs.min-score }}"
+          exit 1
+        fi
+
+    - name: Compare (optional)
+      if: inputs.baseline != '' && inputs.fail-on-regression == 'true'
+      shell: bash
+      env:
+        RULESCOPE_LANG: ${{ inputs.lang }}
+      run: |
+        rulescope compare "${{ inputs.baseline }}" "${{ inputs.target }}" --fail-on-regression
+
+    - name: Upload SARIF (if applicable)
+      if: inputs.format == 'sarif' && always()
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ inputs.output }}
+      continue-on-error: true

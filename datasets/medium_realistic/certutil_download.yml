@@ -1,0 +1,35 @@
+title: Suspicious Certutil Download Activity
+id: 55555555-5555-5555-5555-555555555555
+description: >
+  Detects the use of certutil.exe to download files from remote URLs.
+  This is a well-known living-off-the-land technique used by adversaries
+  to fetch payloads while bypassing application whitelisting controls.
+status: stable
+author: Jean Koumou
+date: 2026/03/18
+modified: 2026/03/18
+references:
+  - https://attack.mitre.org/techniques/T1105/
+  - https://lolbas-project.github.io/#/execute/certutil
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_img:
+    Image|endswith: '\certutil.exe'
+    OriginalFileName: 'CertUtil.exe'
+  selection_cmd:
+    CommandLine|contains:
+      - 'urlcache'
+      - '-split'
+      - '/urlcache'
+  condition: selection_img and selection_cmd
+falsepositives:
+  - Legitimate certificate operations by IT administrators
+  - Software deployment scripts using certutil for hash verification
+tags:
+  - attack.command_and_control
+  - attack.t1105
+  - attack.defense_evasion
+  - attack.t1218
+level: high

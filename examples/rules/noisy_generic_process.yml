@@ -1,0 +1,30 @@
+title: Suspicious Generic Process Pattern
+id: 33333333-3333-3333-3333-333333333333
+description: Detects broadly suspicious process behavior using highly generic string matching.
+status: test
+author: Jean
+date: 2026-03-18
+references:
+  - https://example.org/noise
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  sel1:
+    CommandLine|contains:
+      - '*admin*'
+      - '*temp*'
+      - '*update*'
+    Image|contains:
+      - '*cmd*'
+      - '*powershell*'
+  sel2:
+    ParentImage|contains:
+      - '*explorer*'
+      - '*services*'
+  condition: sel1 or sel2
+falsepositives: []
+tags:
+  - attack.execution
+  - attack.discovery
+level: high
