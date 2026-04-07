@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from functools import lru_cache
 from itertools import combinations
 import re
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 
 ANCHORED_MODIFIERS = frozenset({"endswith", "startswith", "base64", "base64offset", "windash"})
